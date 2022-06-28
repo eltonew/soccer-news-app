@@ -1,34 +1,54 @@
 package my.projetc.soccer_news_projetc.ui.news;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import my.projetc.soccer_news_projetc.data.remote.SoccerNewsApi;
 import my.projetc.soccer_news_projetc.domain.News;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class NewsViewModel extends ViewModel {
 
-    private final MutableLiveData<List<News>> news;
+    private final MutableLiveData<List<News>> news = new MutableLiveData<>();
+
+    private  final SoccerNewsApi  api;
 
     public NewsViewModel() {
-        news = new MutableLiveData<>();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://eltonew.github.io/soccer-news-api/")
+                .addConverterFactory( GsonConverterFactory.create() )
+                .build();
 
-        //TODO remove mock de noticias
-        List<News> news = new  ArrayList<>();
+        api = retrofit.create(SoccerNewsApi.class);
+        this.findNews();
+    }
 
-        news.add(new News("Vasco e 777 assinam a SAF em negócio de R$ 1,7 bi",
-                "O contrato entre Vasco e 777 Partners está oficialmente assinado. Após a conclusão da formalidade das assinaturas eletrônicas no Brasil e nos EUA, o clube iniciou nesta segunda uma nova fase no processo da venda de 70% da SAF. Na sede da KPMG, no Centro do Rio de Janeiro, a Comissão Especial se reuniu para começar a analisar o contrato vinculante."));
+    private void findNews() {
+        api.getNews().enqueue(new Callback<List<News>>() {
 
-        news.add(new News("Com apoio da torcida no aeroporto, Flamengo embarca para a Colômbia com desfalques",
-                "Time tem quatro baixas por Covid-19: Diego Alves, Willian Arão, Matheus Cunha e Fabrício Bruno;"));
+            @Override
+            public void onResponse(Call<List<News>> call, Response< List<News> > response) {
 
-        news.add(new News("Lucas Leiva é apresentado no Grêmio e explica desejo de retornar ao clube: \"Não importa onde está\"",
-                "Volante retorna ao clube 15 anos após saída para o futebol europeu, ganha a camisa 15 usada na Batalha dos Aflitos e diz que objetivo é ajudar o time a subir para a Série A"));
+                if(response.isSuccessful()){
+                    news.setValue(response.body());
+                } else {
+                }
+            }
 
-        this.news.setValue(news);
+            @Override
+            public void onFailure(Call<List<News>> call, Throwable t) {
+
+            }
+        });
     }
 
     public LiveData< List<News> > getNews() { return news; }

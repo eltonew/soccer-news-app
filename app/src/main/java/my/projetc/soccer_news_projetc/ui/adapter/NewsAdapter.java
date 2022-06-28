@@ -1,12 +1,15 @@
 package my.projetc.soccer_news_projetc.ui.adapter;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
+import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
 import my.projetc.soccer_news_projetc.databinding.NewsItemBinding;
@@ -14,7 +17,7 @@ import my.projetc.soccer_news_projetc.domain.News;
 
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
 
-    private List<News> dataNews;
+    private final List<News> dataNews;
 
     public NewsAdapter(List<News> dataNews) {
         this.dataNews = dataNews;
@@ -35,7 +38,17 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
         News news = this.dataNews.get(position);
 
         holder.binding.txtVTitle.setText(news.getTitle());
-        holder.binding.txtVDescription.setText(news.getDesription());
+        holder.binding.txtVDescription.setText(news.getDescription());
+
+        Picasso.get().load(news.getImage())
+                .fit()
+                .into( holder.binding.imgVThumbnail );
+        holder.binding.btnOpenLink.setOnClickListener(view -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+
+            intent.setData( Uri.parse( news.getLink() ) );
+            holder.itemView.getContext().startActivity(intent);
+        });
     }
 
     @Override
